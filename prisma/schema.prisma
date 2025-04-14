@@ -9,3 +9,59 @@ datasource db {
   url      = env("DATABASE_URL")
    directUrl = env("DIRECT_URL")
 }
+
+
+model Admin {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Teacher {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  subject   String?
+  classes   Class[]  // One teacher teaches many classes
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id])
+  attendances Attendance[]
+  createdAt DateTime @default(now())
+}
+
+model Class {
+  id        String    @id @default(uuid())
+  name      String
+  teacherId String?
+  teacher   Teacher?  @relation(fields: [teacherId], references: [id])
+    attendances Attendance[] 
+  students  Student[]
+  createdAt DateTime  @default(now())
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  studentId  String
+  classId    String
+  date       DateTime
+  status     AttendanceStatus
+  student    Student  @relation(fields: [studentId], references: [id])
+  class      Class    @relation(fields: [classId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([studentId, date]) // prevent duplicate entries per day
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
