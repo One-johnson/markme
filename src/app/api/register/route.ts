@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import { supabase } from "@/app/lib/supabaseClient";
+
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   const { email, password, fullName } = await req.json();
