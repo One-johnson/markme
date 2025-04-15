@@ -4,6 +4,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator zod {
+  provider = "prisma-generator-zod"
+  output   = "./zodSchemas" 
+}
+
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -14,6 +20,7 @@ model User {
   id              String   @id @default(uuid())
   email           String   @unique
   fullName        String
+  phone           String    @unique
   role            UserRole
   supabaseUserId  String   @unique
   createdAt       DateTime @default(now())
@@ -38,6 +45,7 @@ model Student {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
+   profileImage String?   
   classId   String
   class     Class    @relation(fields: [classId], references: [id])
   attendances Attendance[]
