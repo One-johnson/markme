@@ -38,7 +38,7 @@ export interface AttendanceEntity {
 export interface UserEntity {
   id: string;
   email: string;
-  fullName: string;
+  username: string;
   role: UserRole;
   supabaseUserId: string;
   phone?: string;

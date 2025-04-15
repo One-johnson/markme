@@ -5,7 +5,7 @@ import { supabase } from "@/app/lib/supabaseClient";
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
-  const { email, password, fullName } = await req.json();
+  const { email, password, username, phone } = await req.json();
 
   // Check if an admin already exists
   const existingAdmin = await prisma.user.findFirst({
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
   await prisma.user.create({
     data: {
       email,
-      fullName,
+      username,
+      phone,
       role: "ADMIN",
       supabaseUserId: data.user.id,
     },
