@@ -2,8 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "@/app/validations/validationSchema";
-import { z } from "zod";
+import { loginSchema } from "@/app/validations/validationSchema"; // Import the schema
+import { z } from "zod"; // Import z namespace from zod
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,51 +17,43 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/stores/authStore";
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>;
 
-export function RegisterForm() {
+export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const router = useRouter();
+  const login = useUserStore((state) => state.login);
 
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
-      phone: "",
     },
   });
 
-  const onSubmit = async (values: RegisterFormValues) => {
+  const onSubmit = async (values: LoginFormValues) => {
     setLoading(true);
     setServerError("");
 
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const res = await login({
+        email: values.email,
+        password: values.password,
+      }); // Use login from store
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data.error || "Something went wrong. Please try again."
-        );
+      if (!res) {
+        throw new Error("Login failed");
       }
 
-      toast.success("Account created successfully! You can now log in.");
-      router.push("/admin-login");
+      toast.success("Login successful!");
+      router.push("/dashboard"); // Redirect to dashboard or another page on success
     } catch (error: unknown) {
-      const errMsg =
-        error instanceof Error ? error.message : "Registration failed";
-      console.error("Registration failed:", errMsg);
+      const errMsg = error instanceof Error ? error.message : "Login failed";
+      console.error("Login failed:", errMsg);
       setServerError(errMsg);
       toast.error(errMsg);
     } finally {
@@ -75,20 +67,6 @@ export function RegisterForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 max-w-md mx-auto"
       >
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="john_doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="email"
@@ -109,26 +87,12 @@ export function RegisterForm() {
 
         <FormField
           control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="+1234567890" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="********" {...field} />
+                <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,7 +104,7 @@ export function RegisterForm() {
         )}
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>
