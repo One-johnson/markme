@@ -57,7 +57,7 @@ export function RegisterForm() {
       }
 
       toast.success("Account created successfully! You can now log in.");
-      router.push("/admin-login");
+      router.push("/pages/login");
     } catch (error: unknown) {
       const errMsg =
         error instanceof Error ? error.message : "Registration failed";
