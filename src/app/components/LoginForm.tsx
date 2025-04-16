@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/stores/authStore";
+import { Loader2 } from "lucide-react";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -43,14 +44,18 @@ export function LoginForm() {
       const res = await login({
         email: values.email,
         password: values.password,
-      }); // Use login from store
+      });
 
       if (!res) {
         throw new Error("Login failed");
       }
 
-      toast.success("Login successful!");
-      router.push("/dashboard"); // Redirect to dashboard or another page on success
+      toast.success("Login successful! Redirecting...");
+
+      // Delay the redirect by 2 seconds
+      setTimeout(() => {
+        router.push("/pages/admin-dashboard");
+      }, 4000);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Login failed";
       console.error("Login failed:", errMsg);
@@ -104,7 +109,14 @@ export function LoginForm() {
         )}
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="animate-spin w-4 h-4" />
+              Logging in...
+            </div>
+          ) : (
+            "Login"
+          )}
         </Button>
       </form>
     </Form>
