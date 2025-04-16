@@ -1,6 +1,6 @@
-// import AdminRegister from "@/app/pages/admin-register/page";
-import Login from "@/app/pages/admin-login/page";
+// This is a React component that serves as the entry point for the application.
+import SplashScreen from "@/app/pages/splash-screen/page";
 
 export default function Home() {
-  return <Login />;
+  return <SplashScreen />;
 }
