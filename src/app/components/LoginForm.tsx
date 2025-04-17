@@ -2,8 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/app/validations/validationSchema"; // Import the schema
-import { z } from "zod"; // Import z namespace from zod
+import { loginSchema } from "@/app/validations/validationSchema";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -52,10 +52,19 @@ export function LoginForm() {
 
       toast.success("Login successful! Redirecting...");
 
-      // Delay the redirect by 2 seconds
+      const userRole = useUserStore.getState().user?.role;
+
       setTimeout(() => {
-        router.push("/pages/admin-dashboard");
-      }, 4000);
+        if (userRole === "ADMIN") {
+          router.push("/pages/admin-dashboard");
+        } else if (userRole === "TEACHER") {
+          router.push("/pages/teacher-dashboard");
+        } else if (userRole === "STUDENT") {
+          router.push("/pages/student-dashboard");
+        } else {
+          router.push("/pages/login");
+        }
+      }, 2000);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Login failed";
       console.error("Login failed:", errMsg);
