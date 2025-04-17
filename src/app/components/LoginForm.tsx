@@ -61,6 +61,8 @@ export function LoginForm() {
           router.push("/pages/teacher-dashboard");
         } else if (userRole === "STUDENT") {
           router.push("/pages/student-dashboard");
+        } else if (userRole === "PARENT") {
+          router.push("/pages/parent-dashboard");
         } else {
           router.push("/pages/login");
         }

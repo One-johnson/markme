@@ -7,7 +7,7 @@ interface User {
   id: string;
   username: string;
   email: string;
-  role: "ADMIN" | "TEACHER" | "STUDENT";
+  role: "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
 }
 
 interface UserState {
