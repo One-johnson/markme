@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabaseClient";
+import { prisma } from "@/app/lib/prisma"; // make sure this path matches your project
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
@@ -16,11 +17,30 @@ export async function POST(req: Request) {
     );
   }
 
+  const prismaUser = await prisma.user.findUnique({
+    where: {
+      supabaseUserId: data.user.id,
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+    },
+  });
+
+  if (!prismaUser) {
+    return NextResponse.json(
+      { error: "User not found in application database" },
+      { status: 404 }
+    );
+  }
+
   return NextResponse.json(
     {
       message: "Login successful",
       session: data.session,
-      user: data.user,
+      user: prismaUser,
     },
     { status: 200 }
   );
