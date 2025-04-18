@@ -16,9 +16,14 @@ model User {
   role           UserRole
   supabaseUserId String    @unique
   createdAt      DateTime  @default(now())
-  students       Student[] // Relation to students
-  teachers       Teacher[] // Relation to teachers
-  parents        Parent[]  // Relation to parents
+  updatedAt      DateTime  @default(now())
+  students       Student[]
+  teachers       Teacher[]
+  parents        Parent[]
+
+  // Add indexes for frequently queried fields
+  @@index([email, role]) // Optimize auth/logins
+  @@index([createdAt]) // Speed up analytics/sorting
 }
 
 enum UserRole {
@@ -33,10 +38,15 @@ model Teacher {
   name      String
   email     String   @unique
   subject   String?
-  classes   Class[]  // One teacher teaches many classes
-  userId    String   // Add userId relation
-  user      User     @relation(fields: [userId], references: [id]) // Relation to User
+  classes   Class[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // Indexes
+  @@index([userId]) // Speeds up JOINs with User
+  @@index([email]) // Faster lookups by email
 }
 
 model Parent {
@@ -44,10 +54,15 @@ model Parent {
   name      String
   email     String    @unique
   phone     String    @unique
-  userId    String    // Add userId relation
-  user      User      @relation(fields: [userId], references: [id]) // Relation to User
-  students  Student[] // A parent can have many students
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students  Student[]
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+
+  // Indexes
+  @@index([userId]) // Optimize User-Parent JOINs
+  @@index([email, phone]) // Faster contact lookups
 }
 
 model Student {
@@ -56,24 +71,35 @@ model Student {
   email          String       @unique
   profileImage   String?
   classId        String
-  class          Class        @relation(fields: [classId], references: [id])
+  class          Class        @relation(fields: [classId], references: [id], name: "ClassToStudent", onDelete: Restrict)
   parentId       String
-  userId         String       // Add the userId relation
-  user           User         @relation(fields: [userId], references: [id]) // Relation to User
-  parent         Parent       @relation(fields: [parentId], references: [id]) // Relation to Parent
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent         Parent       @relation(fields: [parentId], references: [id], onDelete: Restrict)
   supabaseUserId String       @unique
-  attendances    Attendance[] // Relation to Attendance
+  attendances    Attendance[]
   createdAt      DateTime     @default(now())
+
+  // Indexes
+  @@index([classId])
+  @@index([parentId])
+  @@index([userId, email])
 }
 
 model Class {
   id          String       @id @default(uuid())
-  name        String
+  name        String       @unique // Ensure class names are unique
+  description String? // Optional field for class details
   teacherId   String?
-  teacher     Teacher?     @relation(fields: [teacherId], references: [id])
+  teacher     Teacher?     @relation(fields: [teacherId], references: [id], onDelete: SetNull)
   attendances Attendance[]
-  students    Student[]    // Relation to students
+  students    Student[]    @relation("ClassToStudent")
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt // Track updates
+
+  // Add indexes for performance
+  @@index([teacherId])
+  @@index([name])
 }
 
 model Attendance {
@@ -82,11 +108,15 @@ model Attendance {
   classId   String
   date      DateTime
   status    AttendanceStatus
-  student   Student          @relation(fields: [studentId], references: [id])
-  class     Class            @relation(fields: [classId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade) // Delete attendance if student is deleted
+  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
   createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
-  @@unique([studentId, date]) // prevent duplicate entries per day
+  // Composite unique constraint + index
+  @@unique([studentId, date])
+  @@index([classId, date]) // Faster "daily class attendance" reports
+  @@index([status]) // Optimize filtering by status (e.g., "all LATE entries")
 }
 
 enum AttendanceStatus {

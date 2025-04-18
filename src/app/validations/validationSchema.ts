@@ -1,105 +1,110 @@
 import { z } from "zod";
 
+const nameValidation = (fieldName: string) =>
+  z
+    .string()
+    .min(1, `${fieldName} is required`)
+    .max(50, `${fieldName} must be 50 characters or less`);
+
+const emailValidation = z
+  .string()
+  .email("Please enter a valid email")
+  .min(5, "Email must be at least 5 characters")
+  .max(100, "Email must be 100 characters or less");
+
+const uuidValidation = (fieldName: string) =>
+  z.string().uuid(`${fieldName} must be a valid UUID`);
+
+// Auth Schemas
 export const registerSchema = z.object({
   username: z
     .string()
-    .min(3, "Username must be at least 3 characters long")
-    .max(20, "Username can be up to 20 characters long"),
+    .min(3, "Username must be 3-20 characters")
+    .max(20, "Username must be 3-20 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers and underscores"
+    ),
 
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .min(5, "Email must be at least 5 characters long"),
+  email: emailValidation,
 
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(/[a-zA-Z]/, "Password must contain letters")
-    .regex(/[0-9]/, "Password must contain numbers"),
+    .min(8, "Password must be 8+ characters")
+    .regex(/[a-z]/, "Password needs a lowercase letter")
+    .regex(/[A-Z]/, "Password needs an uppercase letter")
+    .regex(/[0-9]/, "Password needs a number")
+    .regex(/[^a-zA-Z0-9]/, "Password needs a special character"),
 
   phone: z
     .string()
-    .min(10, "Phone number must be at least 10 digits")
-    .max(15, "Phone number must be no more than 15 digits")
-    .regex(/^\+?[0-9]+$/, "Phone number must be valid"),
+    .regex(/^\+?[0-9]{10,15}$/, "Enter a valid 10-15 digit phone number"),
 });
 
-// Login Schema
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .min(5, "Email must be at least 5 characters long"),
-
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  email: emailValidation,
+  password: z.string().min(1, "Password is required"),
 });
 
-// Create Class Schema
-export const classSchema = z.object({
-  name: z
+// Class Schema
+export const ClassSchema = z.object({
+  name: nameValidation("Class name"),
+  description: z
     .string()
-    .min(1, "Class name is required")
-    .max(50, "Class name can be up to 50 characters long"),
-
-  teacherId: z.string().uuid().optional(), // Teacher is optional at creation, but can be assigned later
-
-  createdAt: z.date().default(() => new Date()), // Automatically assigns current date if not provided
+    .max(200, "Description must be 200 characters or less")
+    .optional(),
+  teacherId: uuidValidation("Teacher ID").optional(),
 });
 
-// Create Student Schema
+// Student Schema
 export const studentSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Student name is required")
-    .max(50, "Student name can be up to 50 characters long"),
-
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .min(5, "Email must be at least 5 characters long"),
-
-  profileImage: z.string().url("Profile image must be a valid URL").optional(), // Profile image is optional at creation
-
-  classId: z.string().uuid("Class ID must be a valid UUID"), // Class ID must be a valid UUID
-
-  createdAt: z.date().default(() => new Date()), // Automatically assigns current date if not provided
+  name: nameValidation("Student name"),
+  email: emailValidation,
+  profileImage: z.string().url("Enter a valid URL").optional(),
+  classId: uuidValidation("Class ID"),
+  parentId: uuidValidation("Parent ID"),
+  userId: uuidValidation("User ID"),
 });
 
-// Teacher Schema (for Create and Update)
+// Teacher Schema
 export const teacherSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Teacher name is required")
-    .max(50, "Teacher name can be up to 50 characters long"),
-
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .min(5, "Email must be at least 5 characters long"),
-
+  name: nameValidation("Teacher name"),
+  email: emailValidation,
   subject: z
     .string()
-    .min(1, "Subject is required")
-    .max(100, "Subject can be up to 100 characters long")
-    .optional(), // Subject is optional (not all teachers may have a subject)
-
-  createdAt: z.date().optional(), // If updating, you may not want to include this field, so it's optional
+    .max(100, "Subject must be 100 characters or less")
+    .optional(),
+  userId: uuidValidation("User ID"),
 });
 
-const attendanceStatus = z.enum(["PRESENT", "ABSENT", "LATE"]);
+// Parent Schema
+export const ParentSchema = z.object({
+  name: nameValidation("Parent name"),
+  email: emailValidation,
+  phone: z
+    .string()
+    .regex(/^\+?[0-9]{10,15}$/, "Enter a valid 10-15 digit phone number"),
+  userId: uuidValidation("User ID"),
+});
 
+// Attendance Schema
 export const attendanceSchema = z.object({
-  studentId: z.string().uuid("Student ID must be a valid UUID"), // Validating studentId as a UUID
-
-  classId: z.string().uuid("Class ID must be a valid UUID"), // Validating classId as a UUID
-
-  date: z
+  studentId: uuidValidation("Student ID"),
+  classId: uuidValidation("Class ID"),
+  date: z.coerce
     .date()
-    .refine((date) => date instanceof Date && !isNaN(date.getTime()), {
-      message: "Date must be a valid date", // Ensure the date is a valid Date object
+    .max(new Date(), "Date cannot be in the future")
+    .refine((date) => date <= new Date(), {
+      message: "Attendance date cannot be in the future",
     }),
-
-  status: attendanceStatus, // Status must be one of the values: "PRESENT", "ABSENT", or "LATE"
-
-  createdAt: z.date().optional(), // Optional for updating, can be set automatically when creating
+  status: z.enum(["PRESENT", "ABSENT", "LATE"]),
 });
+
+// Type Exports
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ClassInput = z.infer<typeof ClassSchema>;
+export type StudentInput = z.infer<typeof studentSchema>;
+export type TeacherInput = z.infer<typeof teacherSchema>;
+export type ParentInput = z.infer<typeof ParentSchema>;
+export type AttendanceInput = z.infer<typeof attendanceSchema>;

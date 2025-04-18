@@ -1,46 +1,73 @@
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE";
-
 export type UserRole = "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
 
-export interface TeacherEntity {
+export interface BaseEntity {
   id: string;
-  name: string;
-  email: string;
-  subject?: string;
-  createdAt: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
 }
 
-export interface StudentEntity {
-  id: string;
-  name: string;
-  email: string;
-  profileImage?: string;
-  classId: string;
-  createdAt: string;
-}
-
-export interface ClassEntity {
-  id: string;
-  name: string;
-  teacherId: string | null;
-  createdAt: string;
-}
-
-export interface AttendanceEntity {
-  id: string;
-  studentId: string;
-  classId: string;
-  date: string;
-  status: AttendanceStatus;
-  createdAt: string;
-}
-
-export interface UserEntity {
-  id: string;
+export interface UserEntity extends BaseEntity {
   email: string;
   username: string;
+  phone: string;
   role: UserRole;
   supabaseUserId: string;
-  phone?: string;
-  createdAt: string;
+  // Relations (optional in API responses)
+  students?: StudentEntity[];
+  teachers?: TeacherEntity[];
+  parents?: ParentEntity[];
+}
+
+export interface TeacherEntity extends BaseEntity {
+  name: string;
+  email: string;
+  subject?: string | null;
+  userId: string;
+  user?: Pick<UserEntity, "id" | "email" | "role">; // Partial user reference
+  classes?: ClassEntity[]; // Optional relation
+}
+
+export interface StudentEntity extends BaseEntity {
+  name: string;
+  email: string;
+  profileImage?: string | null;
+  classId: string;
+  parentId: string;
+  userId: string;
+  supabaseUserId: string;
+  // Relations (optional in API responses)
+  class?: ClassEntity;
+  parent?: ParentEntity;
+  user?: Pick<UserEntity, "id" | "email" | "role">;
+  attendances?: AttendanceEntity[];
+}
+
+export interface ClassEntity extends BaseEntity {
+  name: string;
+  description?: string | null;
+  teacherId?: string | null;
+  // Relations (optional in API responses)
+  teacher?: TeacherEntity | null;
+  students?: StudentEntity[];
+  attendances?: AttendanceEntity[];
+}
+
+export interface ParentEntity extends BaseEntity {
+  name: string;
+  email: string;
+  phone: string;
+  userId: string;
+  user?: Pick<UserEntity, "id" | "email" | "role">;
+  students?: StudentEntity[];
+}
+
+export interface AttendanceEntity extends BaseEntity {
+  studentId: string;
+  classId: string;
+  date: Date | string;
+  status: AttendanceStatus;
+  // Relations (optional in API responses)
+  student?: Pick<StudentEntity, "id" | "name" | "email">;
+  class?: Pick<ClassEntity, "id" | "name">;
 }
