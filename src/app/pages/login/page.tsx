@@ -1,5 +1,5 @@
 import { LoginForm } from "@/app/components/LoginForm";
-// import AddClassForm from "@/app/components/students/AddClassForm";
+
 import Head from "next/head";
 
 export default function Login() {
@@ -18,8 +18,6 @@ export default function Login() {
           </div>
 
           <LoginForm />
-
-          {/* <AddClassForm /> */}
         </div>
       </div>
     </>
