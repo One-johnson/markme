@@ -4,7 +4,6 @@ import axios from "axios";
 import { StudentEntity } from "@/app/utils/entities";
 import { supabase } from "@/app/lib/supabaseClient";
 
-// Helper function to extract error messages
 const getErrorMessage = (error: unknown, defaultMessage: string): string => {
   if (axios.isAxiosError(error)) {
     return error.response?.data?.message || defaultMessage;

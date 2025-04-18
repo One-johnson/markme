@@ -64,55 +64,53 @@ export async function POST(req: Request) {
 }
 
 // Get All Students
-export async function GET() {
-  try {
-    const students = await prisma.student.findMany({
-      include: {
-        class: true,
-        parent: true,
-      },
-    });
-    return NextResponse.json(students, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch students" },
-      { status: 500 }
-    );
-  }
-}
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
 
-// Get Single Student by ID
-export async function GET_SINGLE(req: Request) {
-  const id = new URL(req.url).searchParams.get("id");
+  if (id) {
+    // Get Single Student by ID
+    try {
+      const student = await prisma.student.findUnique({
+        where: { id },
+        include: {
+          class: true,
+          parent: true,
+        },
+      });
 
-  if (!id) {
-    return NextResponse.json(
-      { error: "Student ID is required" },
-      { status: 400 }
-    );
-  }
+      if (!student) {
+        return NextResponse.json(
+          { error: "Student not found" },
+          { status: 404 }
+        );
+      }
 
-  try {
-    const student = await prisma.student.findUnique({
-      where: { id },
-      include: {
-        class: true,
-        parent: true,
-      },
-    });
-
-    if (!student) {
-      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+      return NextResponse.json(student, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching student by ID:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch student" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json(student, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching student by ID:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch student" },
-      { status: 500 }
-    );
+  } else {
+    // Get All Students
+    try {
+      const students = await prisma.student.findMany({
+        include: {
+          class: true,
+          parent: true,
+        },
+      });
+      return NextResponse.json(students, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch students" },
+        { status: 500 }
+      );
+    }
   }
 }
 
