@@ -1,30 +1,31 @@
-
-
 generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-   directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  username        String
-  phone           String    @unique
-  role            UserRole
-  supabaseUserId  String   @unique
-  createdAt       DateTime @default(now())
+  id             String    @id @default(uuid())
+  email          String    @unique
+  username       String
+  phone          String    @unique
+  role           UserRole
+  supabaseUserId String    @unique
+  createdAt      DateTime  @default(now())
+  students       Student[] // Relation to students
+  teachers       Teacher[] // Relation to teachers
+  parents        Parent[]  // Relation to parents
 }
 
 enum UserRole {
   ADMIN
   TEACHER
   STUDENT
+  PARENT
 }
 
 model Teacher {
@@ -33,39 +34,57 @@ model Teacher {
   email     String   @unique
   subject   String?
   classes   Class[]  // One teacher teaches many classes
+  userId    String   // Add userId relation
+  user      User     @relation(fields: [userId], references: [id]) // Relation to User
   createdAt DateTime @default(now())
 }
 
-model Student {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-   profileImage String?   
-  classId   String
-  class     Class    @relation(fields: [classId], references: [id])
-  attendances Attendance[]
-  createdAt DateTime @default(now())
-}
-
-model Class {
+model Parent {
   id        String    @id @default(uuid())
   name      String
-  teacherId String?
-  teacher   Teacher?  @relation(fields: [teacherId], references: [id])
-    attendances Attendance[] 
-  students  Student[]
+  email     String    @unique
+  phone     String    @unique
+  userId    String    // Add userId relation
+  user      User      @relation(fields: [userId], references: [id]) // Relation to User
+  students  Student[] // A parent can have many students
   createdAt DateTime  @default(now())
 }
 
+model Student {
+  id             String       @id @default(uuid())
+  name           String
+  email          String       @unique
+  profileImage   String?
+  classId        String
+  class          Class        @relation(fields: [classId], references: [id])
+  parentId       String
+  userId         String       // Add the userId relation
+  user           User         @relation(fields: [userId], references: [id]) // Relation to User
+  parent         Parent       @relation(fields: [parentId], references: [id]) // Relation to Parent
+  supabaseUserId String       @unique
+  attendances    Attendance[] // Relation to Attendance
+  createdAt      DateTime     @default(now())
+}
+
+model Class {
+  id          String       @id @default(uuid())
+  name        String
+  teacherId   String?
+  teacher     Teacher?     @relation(fields: [teacherId], references: [id])
+  attendances Attendance[]
+  students    Student[]    // Relation to students
+  createdAt   DateTime     @default(now())
+}
+
 model Attendance {
-  id         String   @id @default(uuid())
-  studentId  String
-  classId    String
-  date       DateTime
-  status     AttendanceStatus
-  student    Student  @relation(fields: [studentId], references: [id])
-  class      Class    @relation(fields: [classId], references: [id])
-  createdAt  DateTime @default(now())
+  id        String           @id @default(uuid())
+  studentId String
+  classId   String
+  date      DateTime
+  status    AttendanceStatus
+  student   Student          @relation(fields: [studentId], references: [id])
+  class     Class            @relation(fields: [classId], references: [id])
+  createdAt DateTime         @default(now())
 
   @@unique([studentId, date]) // prevent duplicate entries per day
 }
