@@ -49,12 +49,12 @@ const AddClassForm: FC<AddClassFormProps> = () => {
         description: data.description,
         teacherId: data.teacherId,
       });
-      toast.success("Class added successfully!"); // Show success toast
+      toast.success("Class added successfully!");
 
       reset(); // Reset the form on successful submission
     } catch (error) {
       console.error("Error adding class:", error);
-      toast.error("Failed to add class. Please try again."); // Show error toast
+      toast.error("Failed to add class. Please try again.");
     } finally {
       setLoading(false); // Set loading to false after submission
     }
