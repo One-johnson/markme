@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
-import { supabase } from "@/app/lib/supabaseClient";
+import { supabaseBrowser } from "@/app/utils/supabase/client";
 
 interface User {
   id: string;
@@ -29,7 +29,16 @@ export const useUserStore = create<UserState>()(
       login: async (credentials) => {
         set({ loading: true, error: null });
         try {
-          const { data } = await axios.post("/api/login", credentials);
+          const response = await axios.post("/api/login", credentials);
+          const { data } = response;
+
+          if (data?.error) {
+            set({
+              error: data.error.message || "Login failed",
+              loading: false,
+            });
+            return false;
+          }
 
           if (data?.user) {
             set({ user: data.user, loading: false });
@@ -45,7 +54,7 @@ export const useUserStore = create<UserState>()(
           console.error("Error logging in:", error);
           set({
             error:
-              error instanceof Error ? error.message : "Invalid credentials",
+              error instanceof Error ? error.message : "Unknown error occurred",
             loading: false,
           });
           return false; // Login failed
@@ -54,12 +63,22 @@ export const useUserStore = create<UserState>()(
 
       // Logout function
       logout: async () => {
-        await supabase.auth.signOut();
-        set({ user: null, error: null }); // Reset state and remove user from persisted storage
+        await supabaseBrowser.auth.signOut();
+        set({ user: null, error: null });
       },
     }),
     {
-      name: "user-storage", // The key used to store the data in localStorage
+      name: "user-storage", 
     }
   )
 );
+
+// Listen to Supabase auth state changes to auto log out the user
+export const listenToAuthChanges = () => {
+  supabaseBrowser.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT" || !session) {
+      // Automatically log out the user if the session expires or the user logs out
+      useUserStore.getState().logout();
+    }
+  });
+};

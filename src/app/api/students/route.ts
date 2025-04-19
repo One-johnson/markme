@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma"; // Adjust path as needed
-import { supabase } from "@/app/lib/supabaseClient"; // Adjust path as needed
+import { supabase } from "@/app/utils/supabase/client"; // Adjust path as needed
 
 // Create Student - with Supabase Auth and linking the User model
 export async function POST(req: Request) {
