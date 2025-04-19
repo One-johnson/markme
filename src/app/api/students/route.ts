@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma"; // Adjust path as needed
-import { supabase } from "@/app/utils/supabase/client"; // Adjust path as needed
+import { prisma } from "@/app/lib/prisma";
+import { supabaseServer } from "@/app/utils/supabase/server";
 
-// Create Student - with Supabase Auth and linking the User model
 export async function POST(req: Request) {
   const { name, email, password, classId, parentId, profileImage } =
     await req.json();
@@ -20,10 +19,11 @@ export async function POST(req: Request) {
     }
 
     // Step 1: Create Supabase Auth User for the student
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data: authData, error: authError } =
+      await supabaseServer.auth.signUp({
+        email,
+        password,
+      });
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
