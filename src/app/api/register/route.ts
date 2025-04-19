@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { supabase } from "@/app/utils/supabase/client";
+import { supabaseServer } from "@/app/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     // Create Supabase Auth user
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseServer.auth.signUp({
       email,
       password,
     });
