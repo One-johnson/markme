@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner"; // ⬅️ Import the Toaster component
+import { Toaster } from "sonner";
+import { useEffect } from "react";
+import { listenToAuthChanges } from "@/app/stores/authStore";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,13 +25,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    listenToAuthChanges();
+  }, []);
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <Toaster richColors position="top-center" /> {/* ⬅️ Add this */}
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

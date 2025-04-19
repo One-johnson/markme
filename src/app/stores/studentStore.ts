@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { StudentEntity } from "@/app/utils/entities";
-import { supabase } from "@/app/lib/supabaseClient";
+import { supabase } from "@/app/utils/supabase/client";
 
 const getErrorMessage = (error: unknown, defaultMessage: string): string => {
   if (axios.isAxiosError(error)) {
