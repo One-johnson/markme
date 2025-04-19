@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { LogoutButton } from "@/app/components/LogoutButton";
 import { useUserStore } from "@/app/stores/authStore";
 import {
   NavigationMenu,
@@ -14,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react"; // Icons for hamburger
 
 const MenuBar = () => {
-  const { user, logout } = useUserStore();
+  const { user } = useUserStore();
   const router = useRouter();
   const [isAvatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -154,12 +155,7 @@ const MenuBar = () => {
               </div>
               <div className="border-t border-gray-300"></div>
               <div className="p-2">
-                <button
-                  onClick={logout}
-                  className="w-full text-left text-red-600 hover:bg-gray-200 p-1 rounded"
-                >
-                  Log Out
-                </button>
+                <LogoutButton />
               </div>
             </div>
           )}

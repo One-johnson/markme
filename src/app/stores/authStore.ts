@@ -12,6 +12,7 @@ interface User {
 
 interface UserState {
   user: User | null;
+  setUser: (user: User | null) => void;
   loading: boolean;
   error: string | null;
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
@@ -22,6 +23,7 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       user: null,
+      setUser: (user) => set({ user }),
       loading: false,
       error: null,
 
@@ -68,17 +70,7 @@ export const useUserStore = create<UserState>()(
       },
     }),
     {
-      name: "user-storage", 
+      name: "user-storage",
     }
   )
 );
-
-// Listen to Supabase auth state changes to auto log out the user
-export const listenToAuthChanges = () => {
-  supabaseBrowser.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT" || !session) {
-      // Automatically log out the user if the session expires or the user logs out
-      useUserStore.getState().logout();
-    }
-  });
-};
