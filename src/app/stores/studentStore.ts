@@ -2,8 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { StudentEntity } from "@/app/utils/entities";
-import { supabase } from "@/app/utils/supabase/client";
-
+import { supabaseBrowser } from "@/app/utils/supabase/client";
 const getErrorMessage = (error: unknown, defaultMessage: string): string => {
   if (axios.isAxiosError(error)) {
     return error.response?.data?.message || defaultMessage;
@@ -127,7 +126,7 @@ export const useStudentStore = create<StudentStore>()(
 
       // Logout
       logout: async () => {
-        await supabase.auth.signOut();
+        await supabaseBrowser.auth.signOut();
         set({ student: null });
       },
     }),
