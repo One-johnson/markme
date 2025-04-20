@@ -1,24 +1,29 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useClickOutside } from "@/app/utils/useClickOutside";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LogoutButton } from "@/app/components/LogoutButton";
 import { useUserStore } from "@/app/stores/authStore";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
+
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react"; // Icons for hamburger
+import { Menu, X } from "lucide-react";
+import NavLinks from "@/app/components/NavLinks";
 
 const MenuBar = () => {
   const { user } = useUserStore();
   const router = useRouter();
   const [isAvatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(
+    dropdownRef,
+    () => setAvatarDropdownOpen(false),
+    isAvatarDropdownOpen
+  );
 
   const initials = useMemo(() => {
     if (user?.username) {
@@ -30,7 +35,7 @@ const MenuBar = () => {
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    setMobileMenuOpen(false); // close mobile nav when navigating
+    setMobileMenuOpen(false);
   };
 
   const toggleAvatarDropdown = () => {
@@ -71,42 +76,7 @@ const MenuBar = () => {
 
       {/* Desktop Nav */}
       <div className="hidden md:block md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-        <NavigationMenu>
-          <NavigationMenuList className="flex space-x-6 font-semibold text-sm md:text-base">
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                onClick={() => handleNavigation("/pages/classes")}
-                className="cursor-pointer"
-              >
-                Classes
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                onClick={() => handleNavigation("/pages/students")}
-                className="cursor-pointer"
-              >
-                Students
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                onClick={() => handleNavigation("/pages/teachers")}
-                className="cursor-pointer"
-              >
-                Teachers
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                onClick={() => handleNavigation("/pages/parents")}
-                className="cursor-pointer"
-              >
-                Parents
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <NavLinks onNavigate={handleNavigation} />
       </div>
 
       {/* Mobile Dropdown Nav */}
@@ -134,33 +104,40 @@ const MenuBar = () => {
         )}
       </AnimatePresence>
 
-      {/* Avatar */}
-      {/* Avatar - hidden on mobile when hamburger is open */}
-      {(!mobileMenuOpen || typeof window === "undefined") && (
-        <div className="relative flex justify-end md:flex">
-          <button onClick={toggleAvatarDropdown} className="flex items-center">
-            <Avatar>
-              <AvatarImage
-                src={`https://ui-avatars.com/api/?name=${user?.username}`}
-              />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-          </button>
+      <div className="relative flex justify-end md:flex">
+        <button onClick={toggleAvatarDropdown} className="flex items-center">
+          <Avatar>
+            <AvatarImage
+              src={`https://ui-avatars.com/api/?name=${user?.username}`}
+            />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+        </button>
 
+        <AnimatePresence>
           {isAvatarDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-60 bg-white text-black shadow-lg rounded-lg p-2 z-50">
+            <motion.div
+              ref={dropdownRef}
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute right-0 mt-10 w-60 bg-white text-black shadow-lg rounded-lg p-2 z-50"
+            >
               <div className="p-2">
                 <div className="font-semibold">{user?.username}</div>
                 <div className="text-sm text-gray-600">{user?.email}</div>
               </div>
-              <div className="border-t border-gray-300"></div>
-              <div className="p-2">
-                <LogoutButton />
+              <div className="border-t border-gray-300 mt-2"></div>
+              <div className="p-2 mt-2">
+                <LogoutButton
+                  onAfterLogout={() => setAvatarDropdownOpen(false)}
+                />
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
