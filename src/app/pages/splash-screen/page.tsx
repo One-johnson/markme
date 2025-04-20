@@ -35,7 +35,7 @@ export default function SplashScreen() {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <span className="relative z-10">MarkMe-Attendance</span>
+          <span className="relative z-10">MarkMe</span>
           <motion.div
             className="absolute inset-0 rounded-full blur-lg opacity-30 bg-gray-600"
             initial={{ scale: 0.7, opacity: 0.2 }}
@@ -54,7 +54,7 @@ export default function SplashScreen() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Your Smart Attendance App
+          Your Smart Attendance System
         </motion.p>
 
         {/* Spinner */}
