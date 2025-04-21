@@ -25,9 +25,9 @@ export const LogoutButton = ({
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logout();
+    logout();
     toast.success("Logged out successfully!");
-    router.push("/login");
+    router.push("/pages/login");
     onAfterLogout?.();
   };
 
@@ -46,7 +46,7 @@ export const LogoutButton = ({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleLogout}>
-            Yes, Log Out
+            Continue
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -66,7 +66,7 @@ export function LoginForm() {
         } else {
           router.push("/pages/login");
         }
-      }, 2000);
+      }, 4000);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Login failed";
       console.error("Login failed:", errMsg);
