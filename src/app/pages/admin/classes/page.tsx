@@ -16,8 +16,9 @@ export default function Classes() {
   }, [fetchClasses]);
 
   return (
-    <PageLayout title="Classes">
-      <div className="flex justify-end mb-4">
+    <PageLayout>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-xl font-semibold">Classes</h1>
         <FormDialog
           triggerLabel="Add Class"
           title="Create a New Class"

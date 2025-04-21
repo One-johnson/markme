@@ -45,16 +45,15 @@ export const useClassStore = create<ClassStore>()(
           const createdClass: ClassEntity = res.data.class;
 
           set((state) => ({
-            classes: [createdClass, ...state.classes], // Append new class
+            classes: [createdClass, ...state.classes],
             loading: false,
           }));
-
-          toast.success("Class added successfully");
+          toast.success("Class created successfully 🎉");
           return createdClass; // ✅ Return the created class
         } catch (error) {
           console.error(error);
           set({ error: "Failed to add class", loading: false });
-          toast.error("Failed to add class");
+
           return null; // ✅ Return null on failure
         }
       },
@@ -70,8 +69,7 @@ export const useClassStore = create<ClassStore>()(
             ),
             loading: false,
           }));
-
-     
+          toast.success("Class updated successfully");
         } catch (error) {
           console.error(error);
           set({ error: "Failed to update class", loading: false });

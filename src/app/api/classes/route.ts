@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextResponse } from "next/server";
 import { ClassSchema } from "@/app/validations/validationSchema";
+import { generateClassId } from "@/app/utils/generateClassId";
 
 // Handle GET requests to fetch all classes or a single class
 export async function GET(req: Request) {
@@ -55,18 +56,21 @@ export async function GET(req: Request) {
 // Handle POST requests to create a new class
 export async function POST(req: Request) {
   try {
-    const { name, description, teacherId } = await req.json();
+    const { name, description, teacherId, status } = await req.json();
 
     // Validate the input using Zod schema
     const validatedData = ClassSchema.parse({
       name,
       description,
       teacherId,
+      status,
     });
+    const classId = generateClassId(validatedData.name);
 
     // Create a new class
     const newClass = await prisma.class.create({
       data: {
+        id: classId,
         ...validatedData,
       },
     });

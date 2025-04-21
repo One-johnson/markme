@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/select";
 import { useClassStore } from "@/app/stores/classStore";
 import { DialogClose } from "@/components/ui/dialog";
-import { toast } from "sonner";
+
 import { Loader2 } from "lucide-react"; // Spinner icon
+
+const statusOptions = ["Active", "Inactive"];
 
 type ClassFormValues = z.infer<typeof ClassSchema>;
 
@@ -38,6 +40,7 @@ export function AddClassForm() {
       name: "",
       description: "",
       teacherId: undefined,
+      status: "Active",
     },
   });
 
@@ -45,10 +48,10 @@ export function AddClassForm() {
     try {
       await addClass({ ...values, createdAt: new Date().toISOString() }); // Create the class
       form.reset(); // ✅ Reset after success
-      toast.success("Class created successfully 🎉");
+    
       fetchClasses(); // Re-fetch the classes after adding
     } catch {
-      toast.error("Something went wrong");
+    
     }
   };
 
@@ -82,36 +85,61 @@ export function AddClassForm() {
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="teacherId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assign Teacher</FormLabel>
+                <Select
+                  value={field.value ?? "none"}
+                  onValueChange={(value) =>
+                    field.onChange(value === "none" ? undefined : value)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a teacher" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">No teacher assigned</SelectItem>
+                    {/* Dynamically render teacher items here */}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="teacherId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Assign Teacher</FormLabel>
-              <Select
-                value={field.value ?? "none"}
-                onValueChange={(value) =>
-                  field.onChange(value === "none" ? undefined : value)
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a teacher" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No teacher assigned</SelectItem>
-                  {/* Map teachers dynamically here */}
-                  {/* <SelectItem value="teacher-id">Teacher Name</SelectItem> */}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {statusOptions.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-center gap-2">
           <DialogClose asChild>
             <Button type="button" variant="outline">
               Cancel

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { statusOptions } from "@/app/utils/entities";
 
 const nameValidation = (fieldName: string) =>
   z
@@ -50,6 +51,7 @@ export const ClassSchema = z.object({
     .max(200, "Description must be 200 characters or less")
     .optional(),
   teacherId: z.string().nullable().optional(),
+  status: z.enum(statusOptions),
 });
 
 // Student Schema

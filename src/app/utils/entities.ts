@@ -1,5 +1,21 @@
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE";
 export type UserRole = "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
+export const statusOptions = [
+  "Fresher",
+  "Continuing",
+  "Graduated",
+  "Fulltime",
+  "Parttime",
+  "Contract",
+  "Upcoming",
+  "Cancelled",
+  "Postponed",
+  "Active",
+  "Inactive",
+  "Withdrawn",
+] as const;
+
+export type StatusType = (typeof statusOptions)[number];
 
 export interface BaseEntity {
   id: string;
@@ -44,12 +60,14 @@ export interface StudentEntity extends BaseEntity {
 }
 
 export interface ClassEntity extends BaseEntity {
+  id: string;
   name: string;
   description?: string | null;
   teacherId?: string | null;
   teacher?: TeacherEntity | null;
   students?: StudentEntity[];
   attendances?: AttendanceEntity[];
+  status: StatusType;
 }
 
 export interface ParentEntity extends BaseEntity {

@@ -90,7 +90,7 @@ model Student {
 
 
 model Class {
-  id          String       @id @default(uuid())
+  id          String       @id 
   name        String       @unique // Ensure class names are unique
   description String? // Optional field for class details
   teacherId   String?
@@ -99,6 +99,7 @@ model Class {
   students    Student[]    @relation("ClassToStudent")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt // Track updates
+  status      String    @default("Active")
 
   // Add indexes for performance
   @@index([teacherId])
