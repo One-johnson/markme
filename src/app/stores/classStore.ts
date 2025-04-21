@@ -1,23 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import axios from "axios";
 import { ClassEntity } from "@/app/utils/entities";
 import { toast } from "sonner";
 
-type ClassStore = {
+interface ClassStore {
   classes: ClassEntity[];
   loading: boolean;
   error: string | null;
-
-  fetchClasses: (
-    withStudents?: boolean,
-    withTeacher?: boolean
-  ) => Promise<void>;
-  createClass: (
-    data: Pick<ClassEntity, "name" | "description" | "teacherId">
-  ) => Promise<void>;
-  updateClass: (data: Partial<ClassEntity> & { id: string }) => Promise<void>;
+  fetchClasses: () => Promise<void>;
+  addClass: (newClass: Omit<ClassEntity, "id">) => Promise<ClassEntity | null>;
+  updateClass: (id: string, updatedData: Partial<ClassEntity>) => Promise<void>;
   deleteClass: (id: string) => Promise<void>;
-};
+}
 
 export const useClassStore = create<ClassStore>()(
   persist(
@@ -26,116 +21,82 @@ export const useClassStore = create<ClassStore>()(
       loading: false,
       error: null,
 
-      fetchClasses: async (withStudents = false, withTeacher = false) => {
+      /** ✅ Fetch All Classes */
+      fetchClasses: async () => {
         set({ loading: true, error: null });
         try {
-          const res = await fetch(
-            `/api/class?withStudents=${withStudents}&withTeacher=${withTeacher}`
-          );
-          const data: ClassEntity[] = await res.json();
-          set({ classes: data });
+          const res = await axios.get("/api/classes?action=get-all");
+          set({ classes: res.data.classes, loading: false });
         } catch (error) {
-          console.error("Fetch classes error:", error);
-          set({ error: "Failed to load classes" });
-        } finally {
-          set({ loading: false });
+          console.error(error);
+          set({ error: "Failed to fetch classes", loading: false });
+          toast.error("Failed to fetch classes");
         }
       },
 
-      createClass: async (data) => {
+      /** ✅ Add Class (Returns the created class) */
+      addClass: async (newClass) => {
         set({ loading: true, error: null });
         try {
-          const res = await fetch("/api/class", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+          const res = await axios.post("/api/classes", {
+            ...newClass,
+            teacherId: newClass.teacherId || null,
           });
-          const newClass = await res.json();
-
-          if (!res.ok)
-            throw new Error(newClass.error || "Failed to create class");
-
-          set((state) => ({ classes: [newClass, ...state.classes] }));
-          toast.success("Class created");
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            toast.error(error.message || "Error creating class");
-            set({ error: error.message || "Failed to create class" });
-          } else {
-            toast.error("An unknown error occurred");
-            set({ error: "Failed to create class" });
-          }
-        } finally {
-          set({ loading: false });
-        }
-      },
-
-      updateClass: async (data) => {
-        set({ loading: true, error: null });
-        try {
-          const res = await fetch("/api/class", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
-          const updated = await res.json();
-
-          if (!res.ok)
-            throw new Error(updated.error || "Failed to update class");
+          const createdClass: ClassEntity = res.data.class;
 
           set((state) => ({
-            classes: state.classes.map((c) =>
-              c.id === updated.id ? updated : c
-            ),
+            classes: [createdClass, ...state.classes], // Append new class
+            loading: false,
           }));
-          toast.success("Class updated");
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            toast.error(error.message || "Error updating class");
-            set({ error: error.message || "Failed to update class" });
-          } else {
-            toast.error("An unknown error occurred");
-            set({ error: "Failed to update class" });
-          }
-        } finally {
-          set({ loading: false });
+
+          toast.success("Class added successfully");
+          return createdClass; // ✅ Return the created class
+        } catch (error) {
+          console.error(error);
+          set({ error: "Failed to add class", loading: false });
+          toast.error("Failed to add class");
+          return null; // ✅ Return null on failure
         }
       },
 
+      /** ✅ Update Class */
+      updateClass: async (id, updatedData) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await axios.put(`/api/classes?id=${id}`, updatedData);
+          set((state) => ({
+            classes: state.classes.map((c) =>
+              c.id === id ? res.data.class : c
+            ),
+            loading: false,
+          }));
+
+     
+        } catch (error) {
+          console.error(error);
+          set({ error: "Failed to update class", loading: false });
+          toast.error("Failed to update class");
+        }
+      },
+
+      /** ✅ Delete Class */
       deleteClass: async (id) => {
         set({ loading: true, error: null });
         try {
-          const res = await fetch("/api/class", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-          });
-
-          if (!res.ok) {
-            const errData = await res.json();
-            throw new Error(errData.error || "Failed to delete class");
-          }
-
+          await axios.delete(`/api/classes?id=${id}`);
           set((state) => ({
             classes: state.classes.filter((c) => c.id !== id),
+            loading: false,
           }));
-          toast.success("Class deleted");
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            toast.error(error.message || "Error deleting class");
-            set({ error: error.message || "Failed to delete class" });
-          } else {
-            toast.error("An unknown error occurred");
-            set({ error: "Failed to delete class" });
-          }
-        } finally {
-          set({ loading: false });
+
+          toast.success("Class deleted successfully");
+        } catch (error) {
+          console.error(error);
+          set({ error: "Failed to delete class", loading: false });
+          toast.error("Failed to delete class");
         }
       },
     }),
-    {
-      name: "class-storage", // localStorage key
-      partialize: (state) => ({ classes: state.classes }), // only persist class list
-    }
+    { name: "class-store" } // Key for localStorage
   )
 );

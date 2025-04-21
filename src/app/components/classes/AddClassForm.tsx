@@ -30,7 +30,7 @@ import { Loader2 } from "lucide-react"; // Spinner icon
 type ClassFormValues = z.infer<typeof ClassSchema>;
 
 export function AddClassForm() {
-  const { createClass, loading } = useClassStore();
+  const { addClass, loading, fetchClasses } = useClassStore();
 
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(ClassSchema),
@@ -43,9 +43,10 @@ export function AddClassForm() {
 
   const onSubmit = async (values: ClassFormValues) => {
     try {
-      await createClass(values);
+      await addClass({ ...values, createdAt: new Date().toISOString() }); // Create the class
       form.reset(); // ✅ Reset after success
       toast.success("Class created successfully 🎉");
+      fetchClasses(); // Re-fetch the classes after adding
     } catch {
       toast.error("Something went wrong");
     }

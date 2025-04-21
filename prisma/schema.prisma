@@ -86,6 +86,9 @@ model Student {
   @@index([userId, email])
 }
 
+
+
+
 model Class {
   id          String       @id @default(uuid())
   name        String       @unique // Ensure class names are unique

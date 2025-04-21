@@ -1,108 +1,149 @@
 import { prisma } from "@/app/lib/prisma";
-import { ClassSchema } from "@/app/validations/validationSchema";
-import { z } from "zod";
 import { NextResponse } from "next/server";
+import { ClassSchema } from "@/app/validations/validationSchema";
 
-// Extended schema for update
-const ClassUpdateSchema = ClassSchema.partial().extend({
-  id: z.string(),
-});
+// Handle GET requests to fetch all classes or a single class
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const action = searchParams.get("action");
+  const id = searchParams.get("id");
+  const withStudents = searchParams.get("withStudents") === "true";
+  const withTeacher = searchParams.get("withTeacher") === "true";
 
-export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const withStudents = searchParams.get("withStudents") === "true";
-    const withTeacher = searchParams.get("withTeacher") === "true";
+    if (action === "get-all") {
+      const classes = await prisma.class.findMany({
+        include: {
+          students: withStudents,
+          teacher: withTeacher,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json({ success: true, classes });
+    }
 
-    const classes = await prisma.class.findMany({
-      include: {
-        teacher: withTeacher,
-        students: withStudents,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    if (action === "get" && id) {
+      const singleClass = await prisma.class.findUnique({
+        where: { id },
+        include: {
+          students: withStudents,
+          teacher: withTeacher,
+        },
+      });
+      if (!singleClass) {
+        return NextResponse.json(
+          { success: false, message: "Class not found" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true, class: singleClass });
+    }
 
-    return NextResponse.json(classes);
-  } catch (error) {
-    console.error("GET /classes error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch classes" },
+      { success: false, message: "Invalid action or missing parameters" },
+      { status: 400 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { success: false, message: (error as Error).message },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: Request) {
+// Handle POST requests to create a new class
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const validatedData = ClassSchema.parse(body);
+    const { name, description, teacherId } = await req.json();
 
-    const newClass = await prisma.class.create({
-      data: validatedData,
+    // Validate the input using Zod schema
+    const validatedData = ClassSchema.parse({
+      name,
+      description,
+      teacherId,
     });
 
-    return NextResponse.json(newClass, { status: 201 });
-  } catch (error) {
-    console.error("POST /classes error:", error);
+    // Create a new class
+    const newClass = await prisma.class.create({
+      data: {
+        ...validatedData,
+      },
+    });
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Validation failed" },
-      { status: 400 }
+      { success: true, class: newClass },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { success: false, message: (error as Error).message },
+      { status: 500 }
     );
   }
 }
 
-export async function PUT(request: Request) {
+// Handle PUT requests to update a class
+export async function PUT(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
   try {
-    const data = await request.json();
-    const validatedData = ClassUpdateSchema.parse(data);
-    const { id, ...updateData } = validatedData;
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Missing class ID" },
+        { status: 400 }
+      );
+    }
+
+    const { name, description, teacherId } = await req.json();
+
+    // Validate the input using Zod schema
+    const validatedData = ClassSchema.partial().parse({
+      name,
+      description,
+      teacherId,
+    });
 
     const updatedClass = await prisma.class.update({
       where: { id },
-      data: updateData,
+      data: validatedData,
     });
 
-    return NextResponse.json(updatedClass);
+    return NextResponse.json({ success: true, class: updatedClass });
   } catch (error) {
-    console.error("PUT /classes error:", error);
+    console.error(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Update failed" },
-      { status: 400 }
+      { success: false, message: (error as Error).message },
+      { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: Request) {
-  try {
-    const { id } = await request.json();
+// Handle DELETE requests to delete a class
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
 
+  try {
     if (!id) {
       return NextResponse.json(
-        { error: "Class ID is required" },
+        { success: false, message: "Missing class ID" },
         { status: 400 }
       );
     }
 
-    const existingClass = await prisma.class.findUnique({ where: { id } });
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found" }, { status: 404 });
-    }
+    // Delete class
+    await prisma.class.delete({
+      where: { id },
+    });
 
-    const studentCount = await prisma.student.count({ where: { classId: id } });
-    if (studentCount > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete class with students" },
-        { status: 400 }
-      );
-    }
-
-    await prisma.class.delete({ where: { id } });
-
-    return new NextResponse(null, { status: 204 }); // Or send a message with status 200 if preferred
+    return NextResponse.json({ success: true, message: "Class deleted" });
   } catch (error) {
-    console.error("DELETE /classes error:", error);
+    console.error(error);
     return NextResponse.json(
-      { error: "Failed to delete class" },
+      { success: false, message: (error as Error).message },
       { status: 500 }
     );
   }
