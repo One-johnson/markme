@@ -101,7 +101,8 @@ export function AddClassForm() {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">No teacher assigned</SelectItem>
-                  {/* Map your teachers here */}
+                  {/* Map teachers dynamically here */}
+                  {/* <SelectItem value="teacher-id">Teacher Name</SelectItem> */}
                 </SelectContent>
               </Select>
               <FormMessage />
