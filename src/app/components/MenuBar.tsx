@@ -16,7 +16,7 @@ const MenuBar = () => {
   const router = useRouter();
   const [isAvatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(
@@ -88,17 +88,20 @@ const MenuBar = () => {
             exit={{ height: 0, opacity: 0 }}
             className="md:hidden overflow-hidden flex flex-col gap-2 font-medium text-sm"
           >
-            <button onClick={() => handleNavigation("/pages/classes")}>
+            <button onClick={() => handleNavigation("/pages/admin/classes")}>
               Classes
             </button>
-            <button onClick={() => handleNavigation("/pages/students")}>
+            <button onClick={() => handleNavigation("/pages/admin/students")}>
               Students
             </button>
-            <button onClick={() => handleNavigation("/pages/teachers")}>
+            <button onClick={() => handleNavigation("/pages/admin/teachers")}>
               Teachers
             </button>
-            <button onClick={() => handleNavigation("/pages/parents")}>
+            <button onClick={() => handleNavigation("/pages/admin/parents")}>
               Parents
+            </button>
+            <button onClick={() => handleNavigation("/pages/admin/attendance")}>
+              Attendance
             </button>
           </motion.div>
         )}
