@@ -1,3 +1,5 @@
+"use client";
+
 import MenuBar from "@/app/components/MenuBar";
 import FormDialog from "@/app/components/FormDialog";
 import { AddClassForm } from "@/app/components/classes/AddClassForm";
@@ -19,7 +21,9 @@ export default function Classes() {
           </FormDialog>
         </div>
 
-        <p className="text-gray-500 mb-4">List of classes will be displayed here.</p>
+        <p className="text-gray-500 mb-4">
+          List of classes will be displayed here.
+        </p>
         {/* Class list goes here */}
       </div>
     </div>

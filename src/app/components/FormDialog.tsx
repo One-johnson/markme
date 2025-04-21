@@ -1,4 +1,3 @@
-// components/ui/ReusableDialog.tsx
 "use client";
 
 import {
@@ -34,7 +33,11 @@ export default function FormDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
-          {description && <DialogDescription className="text-center">{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className="text-center">
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {children}
