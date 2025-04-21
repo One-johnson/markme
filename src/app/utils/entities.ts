@@ -24,7 +24,7 @@ export interface TeacherEntity extends BaseEntity {
   email: string;
   subject?: string | null;
   userId: string;
-  user?: Pick<UserEntity, "id" | "email" | "role">; // Partial user reference
+  user?: Pick<UserEntity, "id" | "email" | "role">;
   classes?: ClassEntity[]; // Optional relation
 }
 
@@ -47,7 +47,6 @@ export interface ClassEntity extends BaseEntity {
   name: string;
   description?: string | null;
   teacherId?: string | null;
-  // Relations (optional in API responses)
   teacher?: TeacherEntity | null;
   students?: StudentEntity[];
   attendances?: AttendanceEntity[];

@@ -14,6 +14,14 @@ const NavLinks = ({ onNavigate }: NavLinksProps) => (
     <NavigationMenuList className="flex space-x-6 font-semibold text-sm md:text-base">
       <NavigationMenuItem>
         <NavigationMenuLink
+          onClick={() => onNavigate("/pages/admin/dashboard")}
+          className="cursor-pointer"
+        >
+          Dashboard
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuLink
           onClick={() => onNavigate("/pages/admin/classes")}
           className="cursor-pointer"
         >

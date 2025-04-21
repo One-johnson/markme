@@ -49,7 +49,7 @@ export const ClassSchema = z.object({
     .string()
     .max(200, "Description must be 200 characters or less")
     .optional(),
-  teacherId: uuidValidation("Teacher ID").optional(),
+  teacherId: z.string().nullable().optional(),
 });
 
 // Student Schema
