@@ -14,7 +14,7 @@ const NavLinks = ({ onNavigate }: NavLinksProps) => (
     <NavigationMenuList className="flex space-x-6 font-semibold text-sm md:text-base">
       <NavigationMenuItem>
         <NavigationMenuLink
-          onClick={() => onNavigate("/pages/classes")}
+          onClick={() => onNavigate("/pages/admin/classes")}
           className="cursor-pointer"
         >
           Classes
@@ -22,7 +22,7 @@ const NavLinks = ({ onNavigate }: NavLinksProps) => (
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink
-          onClick={() => onNavigate("/pages/students")}
+          onClick={() => onNavigate("/pages/admin/students")}
           className="cursor-pointer"
         >
           Students
@@ -30,7 +30,7 @@ const NavLinks = ({ onNavigate }: NavLinksProps) => (
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink
-          onClick={() => onNavigate("/pages/teachers")}
+          onClick={() => onNavigate("/pages/admin/teachers")}
           className="cursor-pointer"
         >
           Teachers
@@ -38,10 +38,18 @@ const NavLinks = ({ onNavigate }: NavLinksProps) => (
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink
-          onClick={() => onNavigate("/pages/parents")}
+          onClick={() => onNavigate("/pages/admin/parents")}
           className="cursor-pointer"
         >
           Parents
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuLink
+          onClick={() => onNavigate("/pages/admin/attendance")}
+          className="cursor-pointer"
+        >
+          Attendance
         </NavigationMenuLink>
       </NavigationMenuItem>
     </NavigationMenuList>

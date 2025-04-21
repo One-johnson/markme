@@ -56,7 +56,7 @@ export function LoginForm() {
 
       setTimeout(() => {
         if (userRole === "ADMIN") {
-          router.push("/pages/admin-dashboard");
+          router.push("/pages/admin/dashboard");
         } else if (userRole === "TEACHER") {
           router.push("/pages/teacher-dashboard");
         } else if (userRole === "STUDENT") {
