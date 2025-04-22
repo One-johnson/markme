@@ -38,10 +38,10 @@ const MenuBar = () => {
       <div className="flex items-center justify-between w-full md:w-auto">
         {/* Username */}
         <div className="text-sm md:text-md font-semibold text-gray-200">
-          👋 Welcome, {user?.username}
+          😊 Welcome, {user?.username}
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown Menu (Hamburger) */}
         <div className="md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -85,7 +85,7 @@ const MenuBar = () => {
         </div>
       </div>
 
-      {/* Desktop Nav */}
+      {/* Desktop Nav Links */}
       <div className="hidden md:block md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
         <NavLinks onNavigate={handleNavigation} />
       </div>

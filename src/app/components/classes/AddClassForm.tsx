@@ -26,7 +26,7 @@ import { useClassStore } from "@/app/stores/classStore";
 import { DialogClose } from "@/components/ui/dialog";
 
 import { Loader2 } from "lucide-react"; // Spinner icon
-import FormDialog from "@/app/components/FormDialog"; 
+import FormDialog from "@/app/components/FormDialog"; // Import FormDialog component
 
 const statusOptions = ["Active", "Inactive"];
 
@@ -58,7 +58,7 @@ export function AddClassForm() {
 
   return (
     <FormDialog
-      triggerLabel="Add Class" 
+      triggerLabel="Add Class" // Trigger label for the button that opens the dialog
       title="Create a New Class"
       description="Fill in the details to add a new class."
     >

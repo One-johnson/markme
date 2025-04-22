@@ -24,12 +24,10 @@ export const ConfirmDeleteDialog = ({
     <AlertDialog open onOpenChange={(open) => !open && onCancel?.()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Are you sure you want to delete {entityName}?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Are you sure you want to delete {entityName}?</AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-gray-500 font-semibold">
-            This action cannot be undone. Please confirm your decision carefully
-            as this action will permanently delete and remove the class data.
+            This action cannot be undone. Please confirm your decision carefully as this
+            action will permanently delete and remove the class data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
