@@ -37,8 +37,8 @@ export default function FormDialog({
       )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          <DialogTitle className="text-center">{title}</DialogTitle>
+          {description && <DialogDescription className="text-center">{description}</DialogDescription>}
         </DialogHeader>
         {children}
       </DialogContent>

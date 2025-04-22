@@ -59,7 +59,7 @@ export default function Classes() {
           classes.map((classItem) => (
             <ClassCard
               key={classItem.id}
-              classEntity={classItem}
+              classData={classItem}
               onView={() => handleView(classItem)}
               onEdit={() => handleEdit(classItem)}
               onDelete={() => handleDelete(classItem.id)}

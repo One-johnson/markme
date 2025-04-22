@@ -125,7 +125,7 @@ export function EditClassForm({
                     }
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a teacher" />
                       </SelectTrigger>
                     </FormControl>
@@ -154,7 +154,7 @@ export function EditClassForm({
                   <FormLabel>Status</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
