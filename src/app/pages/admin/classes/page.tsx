@@ -9,6 +9,7 @@ import { EditClassForm } from "@/app/components/classes/EditClassForm";
 import { ViewClassForm } from "@/app/components/classes/ViewClassForm";
 import PageLayout from "@/app/components/PageLayout";
 import { ClassEntity } from "@/app/utils/entities";
+import { ConfirmDeleteDialog } from "@/app/components/ConfirmDeleteDialog";
 
 export default function Classes() {
   const classes = useClassStore((state) => state.classes);
@@ -16,9 +17,9 @@ export default function Classes() {
   const deleteClass = useClassStore((state) => state.deleteClass);
 
   const [selectedClass, setSelectedClass] = useState<ClassEntity | null>(null);
-  const [dialogType, setDialogType] = useState<"view" | "edit" | "none">(
-    "none"
-  );
+  const [dialogType, setDialogType] = useState<
+    "view" | "edit" | "delete" | "none"
+  >();
 
   useEffect(() => {
     fetchClasses();
@@ -40,10 +41,12 @@ export default function Classes() {
     }, 0);
   };
 
-  const handleDelete = (classId: string) => {
-    if (confirm("Are you sure you want to delete this class?")) {
-      deleteClass(classId); // Call deleteClass to remove it from the store
-    }
+  const handleDelete = (classEntity: ClassEntity) => {
+    setSelectedClass(null);
+    setTimeout(() => {
+      setSelectedClass(classEntity);
+      setDialogType("delete");
+    }, 0);
   };
 
   return (
@@ -62,7 +65,7 @@ export default function Classes() {
               classData={classItem}
               onView={() => handleView(classItem)}
               onEdit={() => handleEdit(classItem)}
-              onDelete={() => handleDelete(classItem.id)}
+              onDelete={() => handleDelete(classItem)}
             />
           ))
         ) : (
@@ -83,6 +86,20 @@ export default function Classes() {
           key={selectedClass.id}
           classEntity={selectedClass}
           closeDialog={() => setDialogType("none")}
+        />
+      )}
+      {dialogType === "delete" && selectedClass && (
+        <ConfirmDeleteDialog
+          entityName="class"
+          onConfirm={() => {
+            deleteClass(selectedClass.id);
+            setDialogType("none");
+            setSelectedClass(null);
+          }}
+          onCancel={() => {
+            setDialogType("none");
+            setSelectedClass(null);
+          }}
         />
       )}
     </PageLayout>

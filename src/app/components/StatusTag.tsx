@@ -54,9 +54,9 @@ const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
       border = "border-indigo-400";
       break;
     case "Active":
-      bgColor = "bg-green-800";
-      textColor = "text-white";
-      border = "border-green-200";
+      bgColor = "bg-green-300";
+      textColor = "text-green-800";
+      border = "border-green-800";
       break;
     case "Inactive":
       bgColor = "bg-red-700";
@@ -76,7 +76,7 @@ const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
 
   return (
     <span
-      className={`${bgColor} ${textColor} ${border} font-normal px-4 rounded-md inline-block text-sm border`}
+      className={`${bgColor} ${textColor} ${border} font-semibold px-4 rounded-md inline-block text-sm border`}
     >
       {status}
     </span>
