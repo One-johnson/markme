@@ -34,20 +34,34 @@ enum UserRole {
 }
 
 model Teacher {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  subject   String?
-  classes   Class[]
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id                String   @id @unique 
+  name              String
+  email             String   @unique
+  subject           String?  
+  qualifications    String?  
+  certifications    String?  
+  yearsOfExperience Int?     
+  contactPhone      String? 
+  emergencyContact  String? 
+  address           String? 
+  status      String    @default("Fulltime")
+  salaryExpectation Float?   
+  profilePicture    String?  
+  references        String?  
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+
+  // Relationships
+  userId            String  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes           Class[]  
 
   // Indexes
-  @@index([userId]) // Speeds up JOINs with User
-  @@index([email]) // Faster lookups by email
+  @@index([userId])
+  @@index([email]) 
 }
+
 
 model Parent {
   id        String    @id @default(uuid())
@@ -61,8 +75,8 @@ model Parent {
   updatedAt DateTime  @default(now())
 
   // Indexes
-  @@index([userId]) // Optimize User-Parent JOINs
-  @@index([email, phone]) // Faster contact lookups
+  @@index([userId]) 
+  @@index([email, phone]) 
 }
 
 model Student {

@@ -39,9 +39,19 @@ export interface TeacherEntity extends BaseEntity {
   name: string;
   email: string;
   subject?: string | null;
+  qualifications?: string | null;
+  certifications?: string | null;
+  yearsOfExperience?: number | null;
+  contactPhone: string;
+  emergencyContact?: string | null;
+  address?: string | null;
+  salaryExpectation?: number | null;
+  profilePicture?: string | null;
+  references?: string | null;
   userId: string;
-  user?: Pick<UserEntity, "id" | "email" | "role">;
-  classes?: ClassEntity[]; // Optional relation
+  user?: Pick<UserEntity, "id" | "email" | "role">; //
+  classes?: ClassEntity[];
+  status: StatusType; //
 }
 
 export interface StudentEntity extends BaseEntity {

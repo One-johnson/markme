@@ -16,7 +16,15 @@ const emailValidation = z
 const uuidValidation = (fieldName: string) =>
   z.string().uuid(`${fieldName} must be a valid UUID`);
 
-// Auth Schemas
+const phoneValidation = z
+  .string()
+  .regex(/^\+?[0-9]{10,15}$/, "Enter a valid 10-15 digit phone number");
+
+const salaryValidation = z
+  .number()
+  .min(0, "Salary must be a positive number")
+  .optional();
+
 export const registerSchema = z.object({
   username: z
     .string()
@@ -33,9 +41,7 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, "Password needs a number")
     .regex(/[^a-zA-Z0-9]/, "Password needs a special character"),
 
-  phone: z
-    .string()
-    .regex(/^\+?[0-9]{10,15}$/, "Enter a valid 10-15 digit phone number"),
+  phone: phoneValidation,
 });
 
 export const loginSchema = z.object({
@@ -71,6 +77,35 @@ export const teacherSchema = z.object({
   subject: z
     .string()
     .max(100, "Subject must be 100 characters or less")
+    .optional(),
+  qualifications: z
+    .string()
+    .max(255, "Qualifications must be 255 characters or less")
+    .optional(),
+  certifications: z
+    .string()
+    .max(255, "Certifications must be 255 characters or less")
+    .optional(),
+  yearsOfExperience: z
+    .number()
+    .min(0, "Years of experience must be a positive number")
+    .max(100, "Years of experience must be 100 or less")
+    .optional(),
+  contactPhone: phoneValidation,
+  emergencyContact: z
+    .string()
+    .max(200, "Emergency contact must be 200 characters or less")
+    .optional(),
+  address: z
+    .string()
+    .max(255, "Address must be 255 characters or less")
+    .optional(),
+  status: z.enum(statusOptions),
+  salaryExpectation: salaryValidation,
+  profilePicture: z.string().url("Enter a valid URL").optional(),
+  references: z
+    .string()
+    .max(500, "References must be 500 characters or less")
     .optional(),
   userId: uuidValidation("User ID"),
 });
