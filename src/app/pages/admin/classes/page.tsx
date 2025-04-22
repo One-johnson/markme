@@ -1,42 +1,90 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useClassStore } from "@/app/stores/classStore";
-import FormDialog from "@/app/components/FormDialog";
+
 import { AddClassForm } from "@/app/components/classes/AddClassForm";
 import { ClassCard } from "@/app/components/classes/ClassCard";
+import { EditClassForm } from "@/app/components/classes/EditClassForm";
+import { ViewClassForm } from "@/app/components/classes/ViewClassForm";
 import PageLayout from "@/app/components/PageLayout";
+import { ClassEntity } from "@/app/utils/entities";
 
 export default function Classes() {
   const classes = useClassStore((state) => state.classes);
   const fetchClasses = useClassStore((state) => state.fetchClasses);
+  const deleteClass = useClassStore((state) => state.deleteClass);
+
+  const [selectedClass, setSelectedClass] = useState<ClassEntity | null>(null);
+  const [dialogType, setDialogType] = useState<"view" | "edit" | "none">(
+    "none"
+  );
 
   useEffect(() => {
     fetchClasses();
   }, [fetchClasses]);
 
+  const handleView = (classEntity: ClassEntity) => {
+    setSelectedClass(null); // Clear first
+    setTimeout(() => {
+      setSelectedClass(classEntity);
+      setDialogType("view");
+    }, 0);
+  };
+
+  const handleEdit = (classEntity: ClassEntity) => {
+    setSelectedClass(null);
+    setTimeout(() => {
+      setSelectedClass(classEntity);
+      setDialogType("edit");
+    }, 0);
+  };
+
+  const handleDelete = (classId: string) => {
+    if (confirm("Are you sure you want to delete this class?")) {
+      deleteClass(classId); // Call deleteClass to remove it from the store
+    }
+  };
+
   return (
     <PageLayout>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-xl font-semibold">Classes</h1>
-        <FormDialog
-          triggerLabel="Add Class"
-          title="Create a New Class"
-          description="Fill in the details to add a new class."
-        >
-          <AddClassForm />
-        </FormDialog>
+
+        <AddClassForm />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {classes.length > 0 ? (
           classes.map((classItem) => (
-            <ClassCard key={classItem.id} classEntity={classItem} />
+            <ClassCard
+              key={classItem.id}
+              classEntity={classItem}
+              onView={() => handleView(classItem)}
+              onEdit={() => handleEdit(classItem)}
+              onDelete={() => handleDelete(classItem.id)}
+            />
           ))
         ) : (
           <p className="text-gray-500">No classes available.</p>
         )}
       </div>
+
+      {dialogType === "view" && selectedClass && (
+        <ViewClassForm
+          key={selectedClass.id}
+          classEntity={selectedClass}
+          closeDialog={() => setDialogType("none")}
+        />
+      )}
+
+      {dialogType === "edit" && selectedClass && (
+        <EditClassForm
+          key={selectedClass.id}
+          classEntity={selectedClass}
+          closeDialog={() => setDialogType("none")}
+        />
+      )}
     </PageLayout>
   );
 }

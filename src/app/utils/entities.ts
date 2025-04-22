@@ -29,7 +29,7 @@ export interface UserEntity extends BaseEntity {
   phone: string;
   role: UserRole;
   supabaseUserId: string;
-  // Relations (optional in API responses)
+
   students?: StudentEntity[];
   teachers?: TeacherEntity[];
   parents?: ParentEntity[];
@@ -60,7 +60,6 @@ export interface StudentEntity extends BaseEntity {
 }
 
 export interface ClassEntity extends BaseEntity {
-  id: string;
   name: string;
   description?: string | null;
   teacherId?: string | null;

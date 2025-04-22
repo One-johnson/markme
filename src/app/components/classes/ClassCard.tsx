@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { ClassEntity } from "@/app/utils/entities"; // Import ClassEntity
+import { ClassEntity } from "@/app/utils/entities";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +31,7 @@ export const ClassCard: FC<ClassCardProps> = ({
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-semibold">{name}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {classEntity.id}
-          </p>{" "}
+          <p className="text-sm text-muted-foreground mt-1">{classEntity.id}</p>
           {description && (
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           )}
@@ -47,19 +45,40 @@ export const ClassCard: FC<ClassCardProps> = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {onView && (
-              <DropdownMenuItem onClick={onView}>View</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  onView();
+                }}
+              >
+                View
+              </DropdownMenuItem>
             )}
             {onEdit && (
-              <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  onEdit();
+                }}
+              >
+                Edit
+              </DropdownMenuItem>
             )}
             {onDelete && (
-              <DropdownMenuItem onClick={onDelete} className="text-red-600">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  onDelete(); 
+                }}
+                className="text-red-600"
+              >
                 Delete
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       <div className="text-sm text-muted-foreground">
         <span>
           <strong>Teacher:</strong> {teacher?.name ?? "N/A"}

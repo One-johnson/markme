@@ -1,3 +1,4 @@
+// components/ui/FormDialog.tsx
 "use client";
 
 import {
@@ -9,37 +10,36 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ReactNode } from "react";
 
 type FormDialogProps = {
-  triggerLabel: string;
+  children: React.ReactNode;
+  triggerLabel?: string;
   title: string;
   description?: string;
-  children: ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export default function FormDialog({
+  children,
   triggerLabel,
   title,
   description,
-  children,
+  isOpen,
+  onOpenChange,
 }: FormDialogProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>{triggerLabel}</Button>
-      </DialogTrigger>
-
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      {triggerLabel && (
+        <DialogTrigger asChild>
+          <Button>{triggerLabel}</Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-center">{title}</DialogTitle>
-          {description && (
-            <DialogDescription className="text-center">
-              {description}
-            </DialogDescription>
-          )}
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-
         {children}
       </DialogContent>
     </Dialog>
