@@ -27,35 +27,32 @@ import { DialogClose } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react"; // Spinner icon
 import FormDialog from "@/app/components/FormDialog";
 import Image from "next/image";
-import { useState } from "react";
-import { uploadProfilePicture } from "@/app/utils/supabase/uploadProfilePictures";
+import { useState } from "react"; // Import useState for image preview handling
+import { uploadProfilePicture } from "@/app/utils/supabase/uploadProfilePictures"; // Import your upload logic
 
 const statusOptions = ["Fulltime", "Parttime", "Contract"];
 
 type TeacherFormValues = z.infer<typeof teacherSchema>;
 
-export function AddTeacherForm() {
-  const { addTeacher, loading, fetchTeachers } = useTeacherStore();
-  const [profilePic, setProfilePic] = useState<string | null>(null); // State to handle profile picture preview
-  const [imageUploading, setImageUploading] = useState(false); // State to manage the image upload status
+interface EditTeacherFormProps {
+  teacherId: string;
+  teacherData: TeacherFormValues;
+}
+
+export function EditTeacherForm({
+  teacherId,
+  teacherData,
+}: EditTeacherFormProps) {
+  const { updateTeacher, loading } = useTeacherStore();
+  const [profilePic, setProfilePic] = useState<string | null>(
+    teacherData.profilePicture || null
+  );
+  const [imageUploading, setImageUploading] = useState(false);
 
   const form = useForm<TeacherFormValues>({
     resolver: zodResolver(teacherSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      qualifications: "",
-      certifications: "",
-      yearsOfExperience: undefined,
-      contactPhone: "",
-      emergencyContact: "",
-      address: "",
-      status: "Active",
-      salaryExpectation: undefined,
-      profilePicture: "",
-      references: "",
-      userId: "",
+      ...teacherData, // Pre-fill form with teacher data
     },
   });
 
@@ -65,13 +62,11 @@ export function AddTeacherForm() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageUploading(true); // Start uploading
-      const teacherId = "teacher-id-placeholder"; // Replace with the actual teacher ID from your context or store
-
+      setImageUploading(true);
       try {
-        const uploadedUrl = await uploadProfilePicture(file, teacherId); // Upload image and get the URL
-        setProfilePic(uploadedUrl); // Set the profile picture preview
-        form.setValue("profilePicture", uploadedUrl); // Set the uploaded URL in the form field
+        const uploadedUrl = await uploadProfilePicture(file, teacherId); // Use the teacher's ID for file storage
+        setProfilePic(uploadedUrl); // Update preview
+        form.setValue("profilePicture", uploadedUrl); // Set form value for profile picture
       } catch (error) {
         console.error("Error uploading profile picture:", error);
       } finally {
@@ -82,19 +77,21 @@ export function AddTeacherForm() {
 
   const onSubmit = async (values: TeacherFormValues) => {
     try {
-      await addTeacher({ ...values, createdAt: new Date().toISOString() }); // Create teacher
-      form.reset(); // Reset form after success
-      fetchTeachers(); // Re-fetch the list of teachers
+      await updateTeacher(teacherId, {
+        ...values,
+        updatedAt: new Date().toISOString(),
+      });
+      form.reset(); // Reset the form after successful submission
     } catch (error) {
-      console.error("Failed to add teacher:", error);
+      console.error("Failed to update teacher:", error);
     }
   };
 
   return (
     <FormDialog
-      triggerLabel="Add Teacher" // Trigger label for the button that opens the dialog
-      title="Create a New Teacher"
-      description="Fill in the details to add a new teacher."
+      triggerLabel="Edit Teacher" // Trigger label for the button that opens the dialog
+      title="Edit Teacher Details"
+      description="Update the teacher's information."
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -310,7 +307,7 @@ export function AddTeacherForm() {
             </DialogClose>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? "Creating..." : "Create Teacher"}
+              {loading ? "Updating..." : "Update Teacher"}
             </Button>
           </div>
         </form>

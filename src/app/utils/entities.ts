@@ -48,10 +48,11 @@ export interface TeacherEntity extends BaseEntity {
   salaryExpectation?: number | null;
   profilePicture?: string | null;
   references?: string | null;
+  status: StatusType; //
   userId: string;
   user?: Pick<UserEntity, "id" | "email" | "role">; //
   classes?: ClassEntity[];
-  status: StatusType; //
+  students?: StudentEntity[];
 }
 
 export interface StudentEntity extends BaseEntity {
