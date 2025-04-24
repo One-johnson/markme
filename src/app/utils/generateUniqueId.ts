@@ -16,3 +16,26 @@ export function generateClassId(name: string): string {
   // Combine them into the final ID
   return `${classPrefix}${randomLetters}${randomNumbers}`;
 }
+
+export function generateTeacherId(name: string): string {
+  // Extract initials from name (e.g. "John Doe" -> "JD")
+  const initials = name
+    .split(" ")
+    .map((word) => word[0]?.toUpperCase())
+    .join("")
+    .slice(0, 2); // Max 2 letters
+
+  const prefix = initials || "T"; // Default to 'T' if no name
+
+  // Generate two random uppercase letters
+  const randomLetters = Array.from({ length: 2 })
+    .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 65))
+    .join("");
+
+  // Generate two random numbers
+  const randomNumbers = Math.floor(Math.random() * 90 + 10);
+
+  return `${prefix}${randomLetters}${randomNumbers}`;
+}
+
+

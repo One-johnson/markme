@@ -1,9 +1,9 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextResponse } from "next/server";
 import { ClassSchema } from "@/app/validations/validationSchema";
-import { generateClassId } from "@/app/utils/generateClassId";
+import { generateClassId } from "@/app/utils/generateUniqueId";
 
-// Handle GET requests to fetch all classes or a single class
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
