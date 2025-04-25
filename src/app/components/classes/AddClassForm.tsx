@@ -146,6 +146,14 @@ export function AddClassForm() {
           </div>
 
           <div className="flex justify-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => form.reset()}
+              disabled={loading}
+            >
+              Reset
+            </Button>
             <DialogClose asChild>
               <Button type="button" variant="outline">
                 Cancel

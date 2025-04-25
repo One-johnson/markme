@@ -1,4 +1,3 @@
-// components/ui/FormDialog.tsx
 "use client";
 
 import {
@@ -35,10 +34,14 @@ export default function FormDialog({
           <Button>{triggerLabel}</Button>
         </DialogTrigger>
       )}
-      <DialogContent>
+      <DialogContent className="sm:max-w-[625px] md:max-w-[750px] lg:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
-          {description && <DialogDescription className="text-center">{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className="text-center">
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
         {children}
       </DialogContent>

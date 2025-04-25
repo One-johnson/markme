@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { supabaseServer } from "@/app/utils/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { teacherSchema } from "@/app/validations/validationSchema";
 import { generateTeacherId } from "@/app/utils/generateUniqueId";
 import { generateRandomPassword } from "@/app/utils/generatePassword";
 import { sendPasswordEmail } from "@/app/utils/emailService";
+
 
 // Create a new teacher (POST)
 export async function POST(req: Request) {
@@ -24,7 +25,32 @@ export async function POST(req: Request) {
   } = await req.json();
 
   try {
-    // Step 1: Check if a teacher already exists by email
+    // ✅ Step 1: Verify access token from Authorization header
+    const authHeader = req.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+
+    if (!token) {
+      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // must be service role
+    );
+
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return NextResponse.json(
+        { error: "User not logged in" },
+        { status: 401 }
+      );
+    }
+
+    // ✅ Step 2: Check if teacher already exists
     const existingTeacher = await prisma.teacher.findUnique({
       where: { email },
     });
@@ -36,56 +62,59 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate random password
+    // ✅ Step 3: Generate password and create new Supabase Auth user
     const generatedPassword = generateRandomPassword();
 
-    // Step 2: Create Supabase Auth User for the teacher
-    const { data: authData, error: authError } =
-      await supabaseServer.auth.signUp({
-        email,
-        password: generatedPassword,
-      });
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password: generatedPassword,
+    });
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
-    // Step 3: Create the user in the database with 'TEACHER' role
-    const user = await prisma.user.create({
-      data: {
-        email,
-        username: name,
-        role: "TEACHER", // Assign 'TEACHER' role
-        supabaseUserId: authData.user?.id || "",
-        phone: contactPhone || "",
-      },
+    // ✅ Step 4: Create user and teacher in a transaction
+    const [newUser, newTeacher] = await prisma.$transaction([
+      prisma.user.create({
+        data: {
+          email,
+          username: name,
+          role: "TEACHER",
+          supabaseUserId: authData.user?.id || "",
+          phone: contactPhone || "",
+        },
+      }),
+      prisma.teacher.create({
+        data: {
+          id: generateTeacherId(name),
+          name,
+          email,
+          subject,
+          qualifications,
+          certifications,
+          yearsOfExperience: yearsOfExperience?.toString() || null,
+          contactPhone,
+          emergencyContact,
+          address,
+          salaryExpectation: salaryExpectation?.toString() || null,
+          profilePicture,
+          references,
+          userId: "", // will be updated next
+        },
+      }),
+    ]);
+
+    // ✅ Step 5: Link teacher to user
+    const updatedTeacher = await prisma.teacher.update({
+      where: { id: newTeacher.id },
+      data: { userId: newUser.id },
     });
 
-    const teacherId = generateTeacherId(name);
-
-    // Step 4: Create the teacher and link to the user
-    const teacher = await prisma.teacher.create({
-      data: {
-        id: teacherId,
-        name,
-        email,
-        subject,
-        qualifications,
-        certifications,
-        yearsOfExperience,
-        contactPhone,
-        emergencyContact,
-        address,
-        salaryExpectation,
-        profilePicture,
-        references,
-        userId: user.id,
-      },
-    });
-
+    // ✅ Step 6: Send password via email
     await sendPasswordEmail(email, generatedPassword);
 
-    return NextResponse.json(teacher, { status: 201 });
+    return NextResponse.json(updatedTeacher, { status: 201 });
   } catch (error) {
     console.error("Error creating teacher:", error);
     return NextResponse.json(
@@ -94,6 +123,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 // Get all teachers (GET)
 export async function GET(req: Request) {
@@ -166,11 +196,14 @@ export async function PUT(req: Request) {
       subject,
       qualifications,
       certifications,
-      yearsOfExperience,
+      yearsOfExperience:
+        yearsOfExperience !== undefined && yearsOfExperience !== null
+          ? Number(yearsOfExperience)
+          : null,
       contactPhone,
       emergencyContact,
       address,
-      salaryExpectation,
+      salaryExpectation: salaryExpectation?.toString() || null,
       profilePicture,
       references,
     });

@@ -12,61 +12,82 @@ interface User {
 
 interface UserState {
   user: User | null;
-  setUser: (user: User | null) => void;
+  accessToken: string | null; // 👈 Add this
   loading: boolean;
   error: string | null;
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
+  syncSession: () => Promise<void>; // 👈 Add syncSession
 }
 
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       user: null,
-      setUser: (user) => set({ user }),
+      accessToken: null,
       loading: false,
       error: null,
 
-      // Login function
       login: async (credentials) => {
         set({ loading: true, error: null });
-        try {
-          const response = await axios.post("/api/login", credentials);
-          const { data } = response;
 
-          if (data?.error) {
-            set({
-              error: data.error.message || "Login failed",
-              loading: false,
-            });
+        try {
+          const { data, error } = await supabaseBrowser.auth.signInWithPassword(
+            {
+              email: credentials.email,
+              password: credentials.password,
+            }
+          );
+
+          if (error || !data.session) {
+            set({ error: error?.message || "Login failed", loading: false });
             return false;
           }
 
-          if (data?.user) {
-            set({ user: data.user, loading: false });
-            return true;
-          } else {
-            set({
-              error: "Login failed, no user data received",
-              loading: false,
-            });
-            return false; // Login failed
-          }
-        } catch (error) {
-          console.error("Error logging in:", error);
+          // 👇 Optionally fetch user details from your backend
+          const response = await axios.get(
+            `/api/users?email=${credentials.email}`
+          );
+          const backendUser = response.data;
+
           set({
-            error:
-              error instanceof Error ? error.message : "Unknown error occurred",
+            user: backendUser,
+            accessToken: data.session.access_token, // 👈 Save token here
             loading: false,
           });
-          return false; // Login failed
+
+          return true;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : "Unknown error",
+            loading: false,
+          });
+          return false;
         }
       },
 
-      // Logout function
       logout: async () => {
         await supabaseBrowser.auth.signOut();
-        set({ user: null, error: null });
+        set({ user: null, accessToken: null, error: null });
+      },
+
+      // Sync session with Supabase on app load or refresh
+      syncSession: async () => {
+        const { data } = await supabaseBrowser.auth.getSession();
+        if (data.session) {
+          try {
+            const email = data.session.user.email;
+            const response = await axios.get(`/api/users?email=${email}`);
+            const backendUser = response.data;
+
+            set({
+              user: backendUser,
+              accessToken: data.session.access_token,
+            });
+          } catch {
+            set({ error: "Failed to sync session" });
+          }
+        }
       },
     }),
     {
