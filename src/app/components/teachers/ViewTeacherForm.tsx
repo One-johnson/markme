@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { TeacherEntity } from "@/app/utils/entities"; // Assuming this is your entity for teacher
+import { TeacherEntity } from "@/app/utils/entities"; 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import Image from "next/image"; // For displaying the profile picture
+import Image from "next/image"; 
 
 import FormDialog from "@/app/components/FormDialog";
 

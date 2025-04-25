@@ -4,6 +4,7 @@ import axios from "axios";
 import { TeacherEntity } from "@/app/utils/entities";
 import { supabaseBrowser } from "@/app/utils/supabase/client";
 import { toast } from "sonner";
+import { useUserStore } from "@/app/stores/authStore";
 
 const getErrorMessage = (error: unknown, defaultMessage: string): string => {
   if (axios.isAxiosError(error)) {
@@ -43,7 +44,7 @@ export const useTeacherStore = create<TeacherStore>()(
         try {
           const res = await axios.get("/api/teachers");
           set({ teachers: res.data, loading: false });
-        } catch (error: unknown) {
+        } catch (error) {
           set({
             error: getErrorMessage(error, "Failed to fetch teachers"),
             loading: false,
@@ -57,7 +58,7 @@ export const useTeacherStore = create<TeacherStore>()(
         try {
           const res = await axios.get(`/api/teachers?id=${id}`);
           set({ teacher: res.data, loading: false });
-        } catch (error: unknown) {
+        } catch (error) {
           set({
             error: getErrorMessage(error, "Failed to fetch teacher"),
             loading: false,
@@ -67,38 +68,54 @@ export const useTeacherStore = create<TeacherStore>()(
 
       addTeacher: async (newTeacher) => {
         set({ loading: true, error: null });
-        set((state) => ({
-          teachers: [{ ...newTeacher, id: "temp-id" }, ...state.teachers],
-          loading: false,
-        }));
+        const { accessToken } = useUserStore.getState();
+
+        if (!accessToken) {
+          set({ error: "User not logged in", loading: false });
+          toast.error("Cannot create teacher: User not logged in");
+          return;
+        }
 
         try {
-          const res = await axios.post("/api/teachers", newTeacher);
+          const res = await axios.post("/api/teachers", newTeacher, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
           set((state) => ({
-            teachers: state.teachers.map((t) =>
-              t.id === "temp-id" ? res.data : t
-            ),
+            teachers: [...state.teachers, res.data],
             loading: false,
           }));
           toast.success("Teacher created successfully 🎉");
-        } catch (error: unknown) {
+        } catch (error) {
           set({
             error: getErrorMessage(error, "Failed to add teacher"),
             loading: false,
           });
+          toast.error("Failed to add teacher");
         }
       },
 
       updateTeacher: async (id, updatedData) => {
         set({ loading: true, error: null });
+        const { accessToken } = useUserStore.getState();
+
+        if (!accessToken) {
+          set({ error: "User not logged in", loading: false });
+          toast.error("Cannot update teacher: User not logged in");
+          return;
+        }
+
         try {
-          const res = await axios.put(`/api/teachers?id=${id}`, updatedData);
+          const res = await axios.put(`/api/teachers?id=${id}`, updatedData, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
           set((state) => ({
             teachers: state.teachers.map((t) => (t.id === id ? res.data : t)),
             loading: false,
           }));
           toast.success("Teacher updated successfully 🎉");
-        } catch (error: unknown) {
+        } catch (error) {
           set({
             error: getErrorMessage(error, "Failed to update teacher"),
             loading: false,
@@ -109,14 +126,25 @@ export const useTeacherStore = create<TeacherStore>()(
 
       deleteTeacher: async (id) => {
         set({ loading: true, error: null });
+        const { accessToken } = useUserStore.getState();
+
+        if (!accessToken) {
+          set({ error: "User not logged in", loading: false });
+          toast.error("Cannot delete teacher: User not logged in");
+          return;
+        }
+
         try {
-          await axios.delete(`/api/teachers?id=${id}`);
+          await axios.delete(`/api/teachers?id=${id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
           set((state) => ({
             teachers: state.teachers.filter((t) => t.id !== id),
             loading: false,
           }));
           toast.success("Teacher deleted successfully");
-        } catch (error: unknown) {
+        } catch (error) {
           set({
             error: getErrorMessage(error, "Failed to delete teacher"),
             loading: false,

@@ -41,15 +41,14 @@ export interface TeacherEntity extends BaseEntity {
   subject?: string | null;
   qualifications?: string | null;
   certifications?: string | null;
-  yearsOfExperience?: number | null;
+  yearsOfExperience?: string | null;
   contactPhone: string;
   emergencyContact?: string | null;
   address?: string | null;
-  salaryExpectation?: number | null;
+  salaryExpectation?: string | null;
   profilePicture?: string | null;
   references?: string | null;
   status: StatusType; //
-  userId: string;
   user?: Pick<UserEntity, "id" | "email" | "role">; //
   classes?: ClassEntity[];
   students?: StudentEntity[];

@@ -20,11 +20,6 @@ const phoneValidation = z
   .string()
   .regex(/^\+?[0-9]{10,15}$/, "Enter a valid 10-15 digit phone number");
 
-const salaryValidation = z
-  .number()
-  .min(0, "Salary must be a positive number")
-  .optional();
-
 export const registerSchema = z.object({
   username: z
     .string()
@@ -74,40 +69,63 @@ export const studentSchema = z.object({
 export const teacherSchema = z.object({
   name: nameValidation("Teacher name"),
   email: emailValidation,
-  subject: z
-    .string()
-    .max(100, "Subject must be 100 characters or less")
-    .optional(),
+  subject: z.string().nullable().optional(),
+
   qualifications: z
     .string()
     .max(255, "Qualifications must be 255 characters or less")
-    .optional(),
+    .optional()
+    .nullable(),
+
   certifications: z
     .string()
     .max(255, "Certifications must be 255 characters or less")
-    .optional(),
+    .optional()
+    .nullable(),
+
   yearsOfExperience: z
-    .number()
-    .min(0, "Years of experience must be a positive number")
-    .max(100, "Years of experience must be 100 or less")
-    .optional(),
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) =>
+        val === null ||
+        val === undefined ||
+        (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100),
+      { message: "Years of experience must be a number between 0 and 100" }
+    ),
+
   contactPhone: phoneValidation,
+
   emergencyContact: z
     .string()
     .max(200, "Emergency contact must be 200 characters or less")
-    .optional(),
+    .optional()
+    .nullable(),
+
   address: z
     .string()
     .max(255, "Address must be 255 characters or less")
-    .optional(),
+    .optional()
+    .nullable(),
+
   status: z.enum(statusOptions),
-  salaryExpectation: salaryValidation,
-  profilePicture: z.string().url("Enter a valid URL").optional(),
+
+  salaryExpectation: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => val === null || val === undefined || !isNaN(Number(val)), {
+      message: "Salary expectation must be a number",
+    }),
+
+  profilePicture: z.string().min(1, "Profile picture is required"),
+
   references: z
     .string()
     .max(500, "References must be 500 characters or less")
-    .optional(),
-  userId: uuidValidation("User ID"),
+    .optional()
+    .nullable(),
 });
 
 // Parent Schema

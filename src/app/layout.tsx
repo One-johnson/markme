@@ -1,8 +1,12 @@
+"use client";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToasterProvider } from "@/components/ui/ToasterProvider";
-import { AuthListener } from "@/app/components/AuthListener";
+import { useEffect } from "react";
+import { useUserStore } from "@/app/stores/authStore";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,6 +27,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    // Sync session from Supabase to your Zustand store
+    useUserStore.getState().syncSession();
+  }, []);
+
   return (
     <html lang="en">
       <body
@@ -30,7 +39,6 @@ export default function RootLayout({
       >
         {children}
         <ToasterProvider />
-        <AuthListener />
       </body>
     </html>
   );

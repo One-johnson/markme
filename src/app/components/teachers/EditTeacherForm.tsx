@@ -29,6 +29,7 @@ import FormDialog from "@/app/components/FormDialog";
 import Image from "next/image";
 import { useState } from "react"; // Import useState for image preview handling
 import { uploadProfilePicture } from "@/app/utils/supabase/uploadProfilePictures"; // Import your upload logic
+import { TeacherEntity } from "@/app/utils/entities";
 
 const statusOptions = ["Fulltime", "Parttime", "Contract"];
 
@@ -37,6 +38,8 @@ type TeacherFormValues = z.infer<typeof teacherSchema>;
 interface EditTeacherFormProps {
   teacherId: string;
   teacherData: TeacherFormValues;
+  closeDialog?: () => void;
+  teacherEntity?: TeacherEntity;
 }
 
 export function EditTeacherForm({
@@ -172,7 +175,11 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>Subject</FormLabel>
                 <FormControl>
-                  <Input placeholder="Subject" {...field} />
+                  <Input
+                    placeholder="Subject"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -187,7 +194,11 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>Qualifications</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Qualifications" {...field} />
+                  <Textarea
+                    placeholder="Qualifications"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -206,6 +217,7 @@ export function EditTeacherForm({
                     type="number"
                     placeholder="Years of Experience"
                     {...field}
+                    value={field.value ?? ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -221,7 +233,12 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>Contact Phone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Phone Number" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="Phone Number"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -236,7 +253,12 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>Emergency Contact</FormLabel>
                 <FormControl>
-                  <Input placeholder="Emergency Contact" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="Emergency Contact"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -277,7 +299,12 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>Salary Expectation</FormLabel>
                 <FormControl>
-                  <Input placeholder="Salary Expectation" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="Salary Expectation"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -292,7 +319,11 @@ export function EditTeacherForm({
               <FormItem>
                 <FormLabel>References</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="References" {...field} />
+                  <Textarea
+                    placeholder="References"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

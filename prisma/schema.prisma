@@ -40,12 +40,12 @@ model Teacher {
   subject           String?  
   qualifications    String?  
   certifications    String?  
-  yearsOfExperience Int?     
+  yearsOfExperience String?     
   contactPhone      String? 
   emergencyContact  String? 
   address           String? 
   status      String    @default("Fulltime")
-  salaryExpectation Float?   
+  salaryExpectation String?   
   profilePicture    String?  
   references        String?  
   
